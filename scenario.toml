@@ -1,16 +1,15 @@
 [green_agent]
-agentbeats_id = ""
-env = { API_KEY = "${GITHUB_SECRET_NAME}", LOG_LEVEL = "INFO" }
+agentbeats_id = "019bb03b-f649-7a41-a26b-82aefef17afc"
+env = {
+GOOGLE_API_KEY = "${GOOGLE_API_KEY}",  
+SERP_API_KEY = "${SERP_API_KEY}", 
+SEC_EDGAR_API_KEY = "${SEC_EDGAR_API_KEY}", 
+LOG_LEVEL = "INFO" }
 
 [[participants]]
 agentbeats_id = ""
-name = "role_1_name"
-env = {}
-
-[[participants]]
-agentbeats_id = ""
-name = "role_2_name"
+name = "finance_agent"
 env = {}
 
 [config]
-# Add your assessment config here
+question = "What was Apple's revenue in 2023?"
