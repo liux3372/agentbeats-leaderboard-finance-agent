@@ -43,12 +43,6 @@ jobs:
       - name: Create output directory
         run: mkdir -p output && chmod 777 output
 
-      - name: Export secrets as environment variables
-        env:
-          SECRETS_JSON: ${{ toJSON(secrets) }}
-        run: |
-          echo "$SECRETS_JSON" | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > .env
-
       - name: Check if GHCR_TOKEN is available
         id: check_ghcr
         env:
@@ -69,6 +63,10 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Run assessment
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
+          SEC_EDGAR_API_KEY: ${{ secrets.SEC_EDGAR_API_KEY }}
         run: docker compose up --timestamps --no-color --exit-code-from agentbeats-client --abort-on-container-exit
 
       - name: Record provenance
