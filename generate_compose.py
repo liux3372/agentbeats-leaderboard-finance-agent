@@ -1,8 +1,10 @@
 """Generate Docker Compose configuration from scenario.toml"""
 
 import argparse
+import json
 import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -48,6 +50,76 @@ def fetch_agent_info(agentbeats_id: str) -> dict:
         sys.exit(1)
 
 
+def get_image_cmd(image: str) -> list[str]:
+    """Get the default Cmd from a Docker image. Tries to pull the image if inspection fails."""
+    try:
+        result = subprocess.run(
+            ["docker", "image", "inspect", image, "--format", "{{json .Config.Cmd}}"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            # Try to pull the image if inspection failed
+            print(f"Image '{image}' not found locally, attempting to pull...")
+            pull_result = subprocess.run(
+                ["docker", "pull", image],
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            if pull_result.returncode == 0:
+                # Retry inspection after pull
+                result = subprocess.run(
+                    ["docker", "image", "inspect", image, "--format", "{{json .Config.Cmd}}"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+            else:
+                print(f"Warning: Failed to pull image '{image}': {pull_result.stderr.strip()}")
+                return []
+        
+        if result.returncode != 0:
+            print(f"Warning: Failed to inspect image '{image}': {result.stderr.strip()}")
+            return []
+        
+        cmd_json = result.stdout.strip()
+        if not cmd_json or cmd_json == "null":
+            return []
+        
+        cmd = json.loads(cmd_json)
+        return cmd if isinstance(cmd, list) else []
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception) as e:
+        print(f"Warning: Error inspecting image '{image}': {e}")
+        return []
+
+
+def extract_executable_from_cmd(cmd: list[str]) -> list[str]:
+    """Extract the executable part from a Cmd (everything before --host or similar flags)."""
+    if not cmd:
+        return []
+    
+    # Find the index of the first flag (starts with --)
+    flag_index = next((i for i, arg in enumerate(cmd) if arg.startswith("--")), len(cmd))
+    
+    # Return everything up to (but not including) the first flag
+    return cmd[:flag_index] if flag_index > 0 else []
+
+
+def build_command(image: str, port: int, card_url: str) -> list[str]:
+    """Build the full command for a service by combining image's default Cmd with our flags."""
+    default_cmd = get_image_cmd(image)
+    executable = extract_executable_from_cmd(default_cmd)
+    
+    # If we found an executable, use it; otherwise fall back to just the flags
+    # (which will work if the image has an entrypoint)
+    if executable:
+        return executable + ["--host", "0.0.0.0", "--port", str(port), "--card-url", card_url]
+    else:
+        return ["--host", "0.0.0.0", "--port", str(port), "--card-url", card_url]
+
+
 COMPOSE_PATH = "docker-compose.yml"
 A2A_SCENARIO_PATH = "a2a-scenario.toml"
 ENV_PATH = ".env.example"
@@ -62,7 +134,7 @@ services:
     image: {green_image}
     platform: linux/amd64
     container_name: green-agent
-    command: ["--host", "0.0.0.0", "--port", "{green_port}", "--card-url", "http://green-agent:{green_port}"]
+    command: {green_command}
     environment:{green_env}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:{green_port}/.well-known/agent-card.json"]
@@ -96,7 +168,7 @@ PARTICIPANT_TEMPLATE = """  {name}:
     image: {image}
     platform: linux/amd64
     container_name: {name}
-    command: ["--host", "0.0.0.0", "--port", "{port}", "--card-url", "http://{name}:{port}"]
+    command: {command}
     environment:{env}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:{port}/.well-known/agent-card.json"]
@@ -175,17 +247,36 @@ def format_depends_on(services: list) -> str:
     return "\n" + "\n".join(lines)
 
 
+def format_command(cmd: list[str]) -> str:
+    """Format a command list as a YAML array string."""
+    # Escape any special characters in command arguments
+    escaped = [json.dumps(arg) for arg in cmd]
+    return "[" + ", ".join(escaped) + "]"
+
+
 def generate_docker_compose(scenario: dict[str, Any]) -> str:
     green = scenario["green_agent"]
     participants = scenario.get("participants", [])
 
     participant_names = [p["name"] for p in participants]
 
+    # Build commands for each service
+    green_command = build_command(
+        green["image"],
+        DEFAULT_PORT,
+        f"http://green-agent:{DEFAULT_PORT}"
+    )
+
     participant_services = "\n".join([
         PARTICIPANT_TEMPLATE.format(
             name=p["name"],
             image=p["image"],
             port=DEFAULT_PORT,
+            command=format_command(build_command(
+                p["image"],
+                DEFAULT_PORT,
+                f"http://{p['name']}:{DEFAULT_PORT}"
+            )),
             env=format_env_vars(p.get("env", {}))
         )
         for p in participants
@@ -196,6 +287,7 @@ def generate_docker_compose(scenario: dict[str, Any]) -> str:
     return COMPOSE_TEMPLATE.format(
         green_image=green["image"],
         green_port=DEFAULT_PORT,
+        green_command=format_command(green_command),
         green_env=format_env_vars(green.get("env", {})),
         green_depends=format_depends_on(participant_names),
         participant_services=participant_services,
