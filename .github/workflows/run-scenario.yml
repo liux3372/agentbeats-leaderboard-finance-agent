@@ -8,7 +8,7 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    if: github.event.repository.fork == true || github.ref != 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    if: github.event.repository.fork == true || github.ref != 'refs/heads/main'
     permissions:
       contents: write
       packages: read
@@ -42,6 +42,12 @@ jobs:
 
       - name: Create output directory
         run: mkdir -p output && chmod 777 output
+
+      - name: Export secrets as environment variables
+        env:
+          SECRETS_JSON: ${{ toJSON(secrets) }}
+        run: |
+          echo "$SECRETS_JSON" | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > .env
 
       - name: Check if GHCR_TOKEN is available
         id: check_ghcr

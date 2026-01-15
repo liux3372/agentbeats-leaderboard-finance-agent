@@ -131,11 +131,6 @@ def resolve_image(agent: dict, name: str) -> None:
     elif has_id:
         info = fetch_agent_info(agent["agentbeats_id"])
         agent["image"] = info["docker_image"]
-        # Store entrypoint/command info if available
-        if "entrypoint" in info:
-            agent["entrypoint"] = info["entrypoint"]
-        if "command" in info:
-            agent["command"] = info["command"]
         print(f"Resolved {name} image: {agent['image']}")
     else:
         print(f"Error: {name} must have either 'image' or 'agentbeats_id' field")
