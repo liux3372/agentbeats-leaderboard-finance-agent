@@ -62,12 +62,6 @@ jobs:
       - name: Create output directory
         run: mkdir -p output && chmod 777 output
 
-      - name: Export secrets as environment variables
-        env:
-          SECRETS_JSON: ${{ toJSON(secrets) }}
-        run: |
-          echo "$SECRETS_JSON" | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > .env
-
       - name: Run assessment
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
