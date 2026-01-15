@@ -91,7 +91,12 @@ jobs:
           SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
           SEC_EDGAR_API_KEY: ${{ secrets.SEC_EDGAR_API_KEY }}
         run: |
-          export GOOGLE_API_KEY SERP_API_KEY SEC_EDGAR_API_KEY
+          # Create temporary .env file for docker compose variable substitution
+          cat > .env << EOF
+          GOOGLE_API_KEY=${GOOGLE_API_KEY}
+          SERP_API_KEY=${SERP_API_KEY}
+          SEC_EDGAR_API_KEY=${SEC_EDGAR_API_KEY}
+          EOF
           docker compose up --timestamps --no-color --exit-code-from agentbeats-client --abort-on-container-exit
 
       - name: Record provenance
@@ -147,4 +152,6 @@ jobs:
 
       - name: Cleanup
         if: always()
-        run: docker compose down -v || true
+        run: |
+          docker compose down -v || true
+          rm -f .env || true
