@@ -2,7 +2,6 @@
 agentbeats_id = "019bb03b-f649-7a41-a26b-82aefef17afc"
 env = {
 GOOGLE_API_KEY = "${GOOGLE_API_KEY}",  
-SERPAPI_API_KEY = "${SERPAPI_API_KEY}", 
 SEC_EDGAR_API_KEY = "${SEC_EDGAR_API_KEY}", 
 LOG_LEVEL = "INFO" }
 
@@ -11,7 +10,6 @@ agentbeats_id = ""
 name = "finance_agent"
 env = {
 GOOGLE_API_KEY = "${GOOGLE_API_KEY}",  
-SERPAPI_API_KEY = "${SERPAPI_API_KEY}", 
 SEC_EDGAR_API_KEY = "${SEC_EDGAR_API_KEY}", 
 LOG_LEVEL = "INFO" }
 
