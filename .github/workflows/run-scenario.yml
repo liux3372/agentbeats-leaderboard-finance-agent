@@ -75,8 +75,13 @@ jobs:
           SEC_EDGAR_API_KEY: ${{ secrets.SEC_EDGAR_API_KEY }}
         run: |
           # Create temporary .env file for docker compose variable substitution
-          cat > .env <<EOF GOOGLE_API_KEY=${GOOGLE_API_KEY} SERP_API_KEY=${SERP_API_KEY} SEC_EDGAR_API_KEY=${SEC_EDGAR_API_KEY} EOF
-          awk -F= '{print $1"=REDACTED"}' .env || true
+          cat > .env <<EOF
+          GOOGLE_API_KEY=${GOOGLE_API_KEY}
+          SERP_API_KEY=${SERP_API_KEY}
+          SEC_EDGAR_API_KEY=${SEC_EDGAR_API_KEY}
+          EOF
+          # show redacted output for logs
+          sed -E 's/=.*/=REDACTED/' .env || true
           docker compose up --timestamps --no-color --exit-code-from agentbeats-client --abort-on-container-exit
 
       - name: Record provenance
