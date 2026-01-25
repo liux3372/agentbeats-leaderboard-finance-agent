@@ -7,7 +7,7 @@ SEC_EDGAR_API_KEY = "${SEC_EDGAR_API_KEY}",
 LOG_LEVEL = "INFO" }
 
 [[participants]]
-agentbeats_id = ""
+agentbeats_id = "019bb975-542e-7b12-ab3d-15d288c79fe5"
 name = "finance_agent"
 env = {
 GOOGLE_API_KEY = "${GOOGLE_API_KEY}",  
