@@ -71,13 +71,12 @@ jobs:
       - name: Run assessment
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-          SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
           SEC_EDGAR_API_KEY: ${{ secrets.SEC_EDGAR_API_KEY }}
         run: |
           # Create temporary .env file for docker compose variable substitution
           cat > .env <<EOF
           GOOGLE_API_KEY=${GOOGLE_API_KEY}
-          SERP_API_KEY=${SERP_API_KEY}
+          SERP_API_KEY=
           SEC_EDGAR_API_KEY=${SEC_EDGAR_API_KEY}
           EOF
           # show redacted output for logs
