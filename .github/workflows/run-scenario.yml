@@ -59,8 +59,8 @@ jobs:
             exit 1
           fi
 
-      - name: Create output directory
-        run: mkdir -p output && chmod 777 output
+      - name: Create results directory
+        run: mkdir -p results && chmod 777 results
 
       - name: Run assessment
         env:
@@ -79,7 +79,7 @@ jobs:
           docker compose up --timestamps --no-color --exit-code-from agentbeats-client --abort-on-container-exit
 
       - name: Record provenance
-        run: python record_provenance.py --compose docker-compose.yml --output output/provenance.json
+        run: python record_provenance.py --compose docker-compose.yml --output results/provenance.json
 
       - name: Generate submission metadata
         id: metadata
@@ -93,8 +93,8 @@ jobs:
       - name: Copy files to submission directory
         run: |
           cp scenario.toml submissions/${{ steps.metadata.outputs.unique_name }}.toml
-          cp output/results.json results/${{ steps.metadata.outputs.unique_name }}.json
-          cp output/provenance.json submissions/${{ steps.metadata.outputs.unique_name }}.provenance.json
+          cp results/results.json results/${{ steps.metadata.outputs.unique_name }}.json
+          cp results/provenance.json submissions/${{ steps.metadata.outputs.unique_name }}.provenance.json
 
       - name: Determine target repository
         id: target
