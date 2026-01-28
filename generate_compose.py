@@ -148,12 +148,12 @@ services:
 
 {participant_services}
   agentbeats-client:
-    image: ghcr.io/agentbeats/agentbeats-client:latest
+    image: ghcr.io/agentbeats/agentbeats-client:v1.2.6
     platform: linux/amd64
     container_name: agentbeats-client
     volumes:
       - ./a2a-scenario.toml:/app/scenario.toml
-      - ./output:/app/output
+      - ./results:/app/output
     command: ["scenario.toml", "output/results.json"]
     depends_on:{client_depends}
     networks:
