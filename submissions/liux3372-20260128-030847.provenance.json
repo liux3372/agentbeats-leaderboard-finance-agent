@@ -1,0 +1,17 @@
+{
+  "image_digests": {
+    "green-agent": "ghcr.io/liux3372/finance-evaluator@sha256:cccf8bde9225c8c814b11a32d59c0ec381237087c37b8838b5636e8b49f250e6",
+    "finance_agent": "ghcr.io/liux3372/finance-agent-base@sha256:89b19b89e95b9dbff261fd9f5de0bef4d137cbf176e38505fcc04bc49ccfdaf9",
+    "agentbeats-client": "ghcr.io/agentbeats/agentbeats-client@sha256:13dfe3ef4e583a80e7ce2fe3becd0ce3b879841368a7f4fa40b6ebbabeeb014e"
+  },
+  "timestamp": "2026-01-28T03:08:47Z",
+  "github_actions": {
+    "run_url": "https://github.com/liux3372/agentbeats-leaderboard-finance-agent/actions/runs/21423351969",
+    "run_logs_url": "https://api.github.com/repos/liux3372/agentbeats-leaderboard-finance-agent/actions/runs/21423351969/logs",
+    "ref": "refs/heads/submission-20260127-220648",
+    "sha": "8caba8194545a0369933b05f15082255a18e8f88",
+    "repository_url": "https://github.com/liux3372/agentbeats-leaderboard-finance-agent",
+    "workflow_ref": "liux3372/agentbeats-leaderboard-finance-agent/.github/workflows/run-scenario.yml@refs/heads/submission-20260127-220648",
+    "workflow_sha": "8caba8194545a0369933b05f15082255a18e8f88"
+  }
+}
