@@ -148,7 +148,7 @@ services:
 
 {participant_services}
   agentbeats-client:
-    image: ghcr.io/agentbeats/agentbeats-client:v1.0.0
+    image: ghcr.io/agentbeats/agentbeats-client:latest
     platform: linux/amd64
     container_name: agentbeats-client
     volumes:
